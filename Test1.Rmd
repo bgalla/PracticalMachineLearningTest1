@@ -15,16 +15,46 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r cars}
-summary(cars)
+```{r load libraries and data}
+library(caret)
+library(rpart)
+library(rpart.plot)
+library(rpart)
+library(rpart.plot)
+training_data_url <- "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+testing_data_url  <- "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+training_data <- read.csv(url(training_data_url))
+testing_data <- read.csv(url(testing_data_url))
 ```
 
-## Including Plots
+```{r Clean the Data}
+dim(training_data)
+training_data <- training_data[,8:160]
+testing_data <- testing_data[,8:160]
+no_variance <- nearZeroVar(training_data)
+training_data <- training_data[,-no_variance]
+testing_data <- testing_data[,-no_variance]
+dim(training_data)
+NACols <-  colSums(is.na(training_data))/nrow(training_data) < 0.95
+training_data <- training_data[,NACols]
+testing_data <- testing_data[,NACols]
+dim(training_data)
 
-You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+
+```
+
+```{r Partition the data into training and crossvalidation}
+inTrain <- createDataPartition(training_data$classe, p=0.75)[[1]]
+clean_training_data <- training_data[inTrain,]
+crossvalidation_data <- training_data[-inTrain,]
+
+```
+```
+{r random forest model, echo=FALSE}
+set.seed(330)
+rfMod <- train(classe ~., method='rf', data=clean_training_data, ntree=128)
+
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
