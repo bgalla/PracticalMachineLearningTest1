@@ -54,7 +54,16 @@ crossvalidation_data <- training_data[-inTrain,]
 {r random forest model, echo=FALSE}
 set.seed(330)
 rfMod <- train(classe ~., method='rf', data=clean_training_data, ntree=128)
+rfPrediction <- predict(rfMod, crossvalidation_data)
+confusionMatrix(crossvalidation_data$classe, rfPrediction)
+```
 
+```
+{r Decision Tree, echo=FALSE}
+set.seed(330)
+DecisionTreeModel <- train(classe ~., method='rpart', data=clean_training_data)
+DecisionTreePrediction <- predict(DecisionTreeModel, crossvalidation_data)
+rpart.plot(DecisionTreeModel$finalModel)
 ```
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
